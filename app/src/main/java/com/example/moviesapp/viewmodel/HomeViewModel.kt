@@ -1,22 +1,18 @@
 package com.example.moviesapp.viewmodel
 
-import android.util.Log
+
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.moviesapp.model.ApiResponse
 import com.example.moviesapp.model.Item
 import com.example.moviesapp.network.MoviesListApiService
-
 import com.example.moviesapp.network.TvShowsListApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Single
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.functions.BiFunction
-import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,75 +20,74 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// Annotates the ViewModel class to enable dependency injection with Hilt.
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-//    private val apiRepository: ApiRepository
-    private val moviesListApiService: MoviesListApiService,  // Inject the API service
-    private val tvShowsListApiService: TvShowsListApiService
+    @ApplicationContext private val context: Context,
+    private val moviesListApiService: MoviesListApiService,  // Injected API service for movies
+    private val tvShowsListApiService: TvShowsListApiService // Injected API service for TV shows
 ) : ViewModel() {
 
+    // StateFlow to track the currently selected screen (Movies or TV Shows).
     private val _selectedScreen = MutableStateFlow(Screen.Movies)
     val selectedScreen: StateFlow<Screen> = _selectedScreen
 
-    // Function to toggle between screens
+    // MutableState to store the list of movies fetched from the API.
+    private val _movies = mutableStateOf<List<Item>>(emptyList())
+    val movies: State<List<Item>> = _movies
+
+    // MutableState to store the list of TV shows fetched from the API.
+    private val _tvShows = mutableStateOf<List<Item>>(emptyList())
+    val tvShows: State<List<Item>> = _tvShows
+
+    // CompositeDisposable to manage RxJava subscriptions and ensure proper disposal.
+    private val compositeDisposable = CompositeDisposable()
+
+    init {
+        fetchMoviesAndTvShows() // Fetch data when ViewModel is created.
+    }
+
+    // Function to toggle between Movies and TV Shows screens.
     fun toggleScreen(screen: Screen) {
         _selectedScreen.value = screen
     }
 
-    private val _movies = mutableStateOf<List<Item>>(emptyList())
-    val movies: State<List<Item>> = _movies
-
-    private val _tvShows = mutableStateOf<List<Item>>(emptyList())
-    val tvShows: State<List<Item>> = _tvShows
-
-    private var disposable: Disposable? = null  // Store the Disposable
-
-    private val compositeDisposable = CompositeDisposable()
-
-    init {
-        Log.d("manual_debug", "line1")
-        fetchMoviesAndTvShows()
-    }
-
+    // Function to fetch movies and TV shows from their respective APIs concurrently.
     private fun fetchMoviesAndTvShows() {
-        Log.d("manual_debug", "line2")
 
         viewModelScope.launch {
             try {
-                // Perform the API calls in parallel using async
+                // Perform API calls concurrently using async and Dispatchers.IO for background execution.
                 val moviesDeferred = async(Dispatchers.IO) { moviesListApiService.getMovies() }
                 val tvShowsDeferred = async(Dispatchers.IO) { tvShowsListApiService.getTvShows() }
 
-                // Wait for both API calls to complete
+                // Await the results of both API calls.
                 val moviesResponse = moviesDeferred.await()
                 val tvShowsResponse = tvShowsDeferred.await()
 
-//                Log.d("manual_debug", "line3")
-//                Log.d("manual_debug", moviesResponse.toString())
-//                Log.d("manual_debug", tvShowsResponse.toString())
+                // Update state with the fetched data, or fallback to an empty list if null.
+                _movies.value = moviesResponse.titles
+                _tvShows.value = tvShowsResponse.titles
 
-                // Update the state with the data received
-                _movies.value = moviesResponse.titles ?: emptyList()
-                _tvShows.value = tvShowsResponse.titles ?: emptyList()
             } catch (error: Exception) {
-                // Handle the error gracefully
-                Log.e("manual_debug", error.message ?: "Unknown error")
+                // Show a toast message in case of an error
+                Toast.makeText(
+                    // Assuming 'getApplication()' or 'context' is available for Toast
+                    context,
+                    "Unable to fetch data.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
-
-    // Dispose of the subscription when ViewModel is cleared
-//    override fun onCleared() {
-//        super.onCleared()
-//        disposable?.dispose()
-//    }
-
+    // Dispose of all RxJava subscriptions when the ViewModel is cleared.
     override fun onCleared() {
         super.onCleared()
-        compositeDisposable.clear() // Dispose of all subscriptions
+        compositeDisposable.clear()
     }
 
+    // Enum to define the possible screens in the app.
     enum class Screen {
         Movies,
         TVShows

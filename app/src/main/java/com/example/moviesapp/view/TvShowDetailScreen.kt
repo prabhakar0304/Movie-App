@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.moviesapp.animation.ShimmerEffect
-import com.example.moviesapp.viewmodel.MovieDetailViewModel
 import com.example.moviesapp.viewmodel.TvShowDetailViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -119,15 +118,15 @@ fun TvShowDetailScreen(
 
                 Box(
                     modifier = Modifier
-                        .width(200.dp) // Fixed width for the shimmer placeholder
+                        .width(200.dp)
                         .height(20.dp)
                 ) {
                     if (isDataLoaded) {
                         // Check if release_date is null or not
-                        val releaseDateText = tvShow.release_date?.let {
+                        val releaseDateText = tvShow.release_date.let {
                             val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-                            dateFormat.format(it) // Format Date to String
-                        } ?: "Release: Not available" // Default text if release_date is null
+                            dateFormat.format(it)
+                        } ?: "Release: Not available"
 
                         Text(
                             text = "Release : $releaseDateText",
@@ -159,7 +158,7 @@ fun TvShowDetailScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight() // Allow height to wrap based on content size
+                    .wrapContentHeight()
             ) {
                 if (isDataLoaded) {
                     Text(

@@ -1,7 +1,6 @@
 package com.example.moviesapp
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,24 +14,33 @@ import com.example.moviesapp.view.HomeView
 import com.example.moviesapp.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
+// This annotation marks the activity as a Hilt injection entry point.
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    // Using Hilt to provide an instance of HomeViewModel scoped to this activity.
     private val homeViewModel: HomeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Enables edge-to-edge display for this activity.
         enableEdgeToEdge()
 
+        // Sets the content view with Jetpack Compose.
         setContent {
+            // Applying the custom app theme.
             MoviesAppTheme {
-                // Collect the selectedScreen StateFlow as State
+                // Collects the current selectedScreen value from the ViewModel's StateFlow.
                 val selectedScreen by homeViewModel.selectedScreen.collectAsState()
-//                Log.d("demo", "demo")
+
+                // Setting up the UI layout using a Scaffold to manage the screen structure.
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    // Displays the HomeView composable and passes the necessary data and callbacks.
                     HomeView(
                         modifier = Modifier.padding(innerPadding),
                         selectedScreen = selectedScreen,
-                        // Pass the selected screen to toggleScreen
+                        // Callback to handle screen toggle actions from the ViewModel.
                         onToggleScreen = { homeViewModel.toggleScreen(it) }
                     )
                 }

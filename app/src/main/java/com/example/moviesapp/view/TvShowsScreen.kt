@@ -1,5 +1,6 @@
 package com.example.moviesapp.view
 
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,54 +22,65 @@ import com.example.moviesapp.animation.ShimmerEffect
 import com.example.moviesapp.model.Item
 import com.example.moviesapp.viewmodel.HomeViewModel
 
+
+/**
+ * Main screen for displaying the list of TV shows and handling navigation.
+ *
+ * @param homeViewModel The ViewModel responsible for providing TV show data.
+ */
 @Composable
 fun TvShowsScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
-    val navController = rememberNavController()
+    val navController = rememberNavController() // Navigation controller for managing screen transitions
     val tvShows = homeViewModel.tvShows.value // Fetch TV shows from HomeViewModel
 
-    // Place the NavHost inside the composable function
+    // Navigation Host for handling navigation between screens
     NavHost(
         navController = navController,
         startDestination = "tv_shows_list"
     ) {
-        // Tv Show List Screen
+        // TV Shows List Screen
         composable("tv_shows_list") {
             TvShowListScreen(
                 tvShows = tvShows,
                 onTvShowClick = { tvShowId ->
-                    navController.navigate("tv_show_detail/$tvShowId")
+                    navController.navigate("tv_show_detail/$tvShowId") // Navigate to detail screen
                 }
             )
         }
-        // Tv Show Detail Screen
+        // TV Show Detail Screen
         composable(
             route = "tv_show_detail/{tvShowId}",
-            arguments = listOf(navArgument("tvShowId") { type = NavType.IntType })
+            arguments = listOf(navArgument("tvShowId") { type = NavType.IntType }) // Argument for TV show ID
         ) { backStackEntry ->
-            val tvShowId = backStackEntry.arguments?.getInt("tvShowId") ?: 0
+            val tvShowId = backStackEntry.arguments?.getInt("tvShowId") ?: 0 // Retrieve TV show ID
             TvShowDetailScreen(tvShowId = tvShowId)
         }
     }
 }
 
-
+/**
+ * Screen displaying a list of TV shows or a shimmer effect when loading.
+ *
+ * @param tvShows List of TV shows to display.
+ * @param onTvShowClick Callback when a TV show is clicked.
+ */
 @Composable
 fun TvShowListScreen(
     tvShows: List<Item>,
     onTvShowClick: (Int) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(), // Fill the available screen space
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (tvShows.isEmpty()) {
+        if (tvShows.isEmpty()) { // Show shimmer effect while loading
             LazyColumn {
                 items(12) { // Display 12 shimmer placeholders
                     ShimmerTvShowItem()
                 }
             }
-        } else {
+        } else { // Display the list of TV shows
             LazyColumn {
                 items(tvShows) { tvShow ->
                     TvShowItem(tvShow = tvShow, onTvShowClick = onTvShowClick)
@@ -78,32 +90,39 @@ fun TvShowListScreen(
     }
 }
 
-
+/**
+ * Composable displaying a single TV show item in the list.
+ *
+ * @param tvShow The TV show to display.
+ * @param onTvShowClick Callback when the item is clicked.
+ */
 @Composable
 fun TvShowItem(tvShow: Item, onTvShowClick: (Int) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onTvShowClick(tvShow.id) },
+            .clickable { onTvShowClick(tvShow.id) }, // Handle click event
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp) // Inner padding for the card content
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                Text(text = tvShow.title, modifier = Modifier.padding(bottom = 4.dp))
-                Text(text = "${tvShow.year}")
+                Text(text = tvShow.title, modifier = Modifier.padding(bottom = 4.dp)) // Show title
+                Text(text = "${tvShow.year}") // Show year
             }
         }
     }
 }
 
-
+/**
+ * Composable showing a shimmer effect for TV show items while loading.
+ */
 @Composable
 fun ShimmerTvShowItem() {
     Card(
@@ -117,29 +136,30 @@ fun ShimmerTvShowItem() {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Shimmer placeholder for the title
+            // Column for shimmer placeholders
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
+                // Placeholder for the title
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.6f) // Placeholder width (60% of the screen width)
                         .height(20.dp) // Placeholder height
                 ) {
-                    ShimmerEffect(modifier = Modifier.fillMaxSize())
+                    ShimmerEffect(modifier = Modifier.fillMaxSize()) // Apply shimmer effect
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp)) // Space between placeholders
 
-                // Shimmer placeholder for the year
+                // Placeholder for the year
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.4f) // Placeholder width (40% of the screen width)
                         .height(16.dp) // Placeholder height
                 ) {
-                    ShimmerEffect(modifier = Modifier.fillMaxSize())
+                    ShimmerEffect(modifier = Modifier.fillMaxSize()) // Apply shimmer effect
                 }
             }
         }

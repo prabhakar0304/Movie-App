@@ -21,46 +21,51 @@ import com.example.moviesapp.animation.ShimmerEffect
 import com.example.moviesapp.model.Item
 import com.example.moviesapp.viewmodel.HomeViewModel
 
+// Composable to display the MoviesScreen
 @Composable
 fun MoviesScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
-    val navController = rememberNavController()
+    val navController = rememberNavController() // Remember navigation controller for navigation between screens
     val movies = homeViewModel.movies.value // Fetch movies from HomeViewModel
 
-    // Navigation Host for navigation between list and detail screens
+    // Navigation Host to manage navigation between different screens
     NavHost(
         navController = navController,
-        startDestination = "movies_list"
+        startDestination = "movies_list" // Starting screen is the movie list
     ) {
+        // Define composable for movies list screen
         composable("movies_list") {
             MovieListScreen(
-                movies = movies,
+                movies = movies, // Passing movies to the MovieListScreen
                 onMovieClick = { movieId ->
-                    // Navigate to the detail screen with the movieId
+                    // Navigate to movie detail screen passing movieId
                     navController.navigate("movie_detail/$movieId")
                 }
             )
         }
+        // Define composable for movie detail screen
         composable(
             route = "movie_detail/{movieId}",
-            arguments = listOf(navArgument("movieId") { type = NavType.IntType })
+            arguments = listOf(navArgument("movieId") { type = NavType.IntType }) // Expect movieId as an argument
         ) { backStackEntry ->
+            // Extract movieId from backStackEntry arguments
             val movieId = backStackEntry.arguments?.getInt("movieId") ?: 0
-            MovieDetailScreen(movieId = movieId)
+            MovieDetailScreen(movieId = movieId) // Show movie detail screen with given movieId
         }
     }
 }
 
+// Composable to display the list of movies
 @Composable
 fun MovieListScreen(
-    movies: List<Item>,
-    onMovieClick: (Int) -> Unit
+    movies: List<Item>, // List of movies
+    onMovieClick: (Int) -> Unit // Callback for when a movie item is clicked
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(), // Ensure the column fills available space
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Show shimmer effect if movies are not loaded yet
+        // If movies are not loaded, display shimmer effect for placeholders
         if (movies.isEmpty()) {
             LazyColumn {
                 items(12) { // Display 12 shimmer placeholders
@@ -68,53 +73,58 @@ fun MovieListScreen(
                 }
             }
         } else {
+            // If movies are loaded, display the list of movie items
             LazyColumn {
                 items(movies) { movie ->
-                    MovieItem(movie = movie, onMovieClick = onMovieClick)
+                    MovieItem(movie = movie, onMovieClick = onMovieClick) // Display each movie item
                 }
             }
         }
     }
 }
 
+// Composable to display individual movie item
 @Composable
 fun MovieItem(movie: Item, onMovieClick: (Int) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onMovieClick(movie.id) },
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(8.dp) // Add padding around the card
+            .clickable { onMovieClick(movie.id) }, // Trigger onMovieClick when the card is clicked
+        elevation = CardDefaults.cardElevation(4.dp) // Add elevation to the card
     ) {
         Row(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp) // Add padding inside the card
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+                    .fillMaxWidth() // Ensure column takes up full width
+                    .padding(8.dp) // Add padding inside the column
             ) {
+                // Movie title
                 Text(text = movie.title, modifier = Modifier.padding(bottom = 4.dp))
+                // Movie year
                 Text(text = "${movie.year}")
             }
         }
     }
 }
 
+// Composable to show shimmer placeholders for movie item while data is loading
 @Composable
 fun ShimmerMovieItem() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(8.dp), // Add padding around the shimmer card
+        elevation = CardDefaults.cardElevation(4.dp) // Elevation for the shimmer card
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp) // Padding inside the shimmer card
         ) {
-            // Shimmer placeholder for the title
+            // Shimmer effect placeholder for movie title
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -122,21 +132,21 @@ fun ShimmerMovieItem() {
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.6f) // Placeholder width (60% of the screen width)
-                        .height(20.dp) // Placeholder height
+                        .fillMaxWidth(0.6f) // Placeholder width (60% of screen width)
+                        .height(20.dp) // Placeholder height for title
                 ) {
-                    ShimmerEffect(modifier = Modifier.fillMaxSize())
+                    ShimmerEffect(modifier = Modifier.fillMaxSize()) // Apply shimmer effect
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp)) // Spacer between placeholders
 
-                // Shimmer placeholder for the year
+                // Shimmer effect placeholder for movie year
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.4f) // Placeholder width (40% of the screen width)
-                        .height(16.dp) // Placeholder height
+                        .fillMaxWidth(0.4f) // Placeholder width (40% of screen width)
+                        .height(16.dp) // Placeholder height for year
                 ) {
-                    ShimmerEffect(modifier = Modifier.fillMaxSize())
+                    ShimmerEffect(modifier = Modifier.fillMaxSize()) // Apply shimmer effect
                 }
             }
         }

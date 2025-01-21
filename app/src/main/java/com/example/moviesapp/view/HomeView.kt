@@ -14,49 +14,50 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun HomeView(
     modifier: Modifier = Modifier,
-    selectedScreen: HomeViewModel.Screen,
-    onToggleScreen: (HomeViewModel.Screen) -> Unit
+    selectedScreen: HomeViewModel.Screen, // Holds the current selected screen
+    onToggleScreen: (HomeViewModel.Screen) -> Unit // Function to toggle between screens
 ) {
     Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier.fillMaxSize(), // Ensure the Column takes full available space
+        verticalArrangement = Arrangement.Top, // Align content to the top
+        horizontalAlignment = Alignment.CenterHorizontally // Center content horizontally
     ) {
-        // Toggle Buttons
+        // Row of Toggle Buttons for Movies and TV Shows
         Row(modifier = Modifier.padding(16.dp)) {
+
             // Movies Button
             Button(
-                onClick = { onToggleScreen(HomeViewModel.Screen.Movies) },
-                modifier = Modifier.weight(1f), // Makes the button take equal width
+                onClick = { onToggleScreen(HomeViewModel.Screen.Movies) }, // Set selected screen to Movies
+                modifier = Modifier.weight(1f), // Makes the button take equal width with other buttons
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (selectedScreen == HomeViewModel.Screen.Movies) Color(0xFFA020F0) // Purple color
-                    else Color(0xFFA4A7AB), // Dark gray
-                    contentColor = Color.White
+                    containerColor = if (selectedScreen == HomeViewModel.Screen.Movies) Color(0xFFA020F0) // Purple color for selected button
+                    else Color(0xFFA4A7AB), // Dark gray for unselected button
+                    contentColor = Color.White // White text color
                 )
             ) {
-                Text("Movies")
+                Text("Movies") // Button label for Movies
             }
 
             Spacer(modifier = Modifier.width(16.dp)) // Small space between buttons
 
             // TV Shows Button
             Button(
-                onClick = { onToggleScreen(HomeViewModel.Screen.TVShows) },
-                modifier = Modifier.weight(1f), // Makes the button take equal width
+                onClick = { onToggleScreen(HomeViewModel.Screen.TVShows) }, // Set selected screen to TV Shows
+                modifier = Modifier.weight(1f), // Makes the button take equal width with other buttons
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (selectedScreen == HomeViewModel.Screen.TVShows) Color(0xFFA020F0) // Purple color
-                    else Color(0xFFA4A7AB), // Dark gray
-                    contentColor = Color.White
+                    containerColor = if (selectedScreen == HomeViewModel.Screen.TVShows) Color(0xFFA020F0) // Purple color for selected button
+                    else Color(0xFFA4A7AB), // Dark gray for unselected button
+                    contentColor = Color.White // White text color
                 )
             ) {
-                Text("TV Shows")
+                Text("TV Shows") // Button label for TV Shows
             }
         }
 
-        // Content Based on Selected Screen
+        // Display content based on the currently selected screen
         when (selectedScreen) {
-            HomeViewModel.Screen.TVShows-> TvShowsScreen()
-            HomeViewModel.Screen.Movies -> MoviesScreen()
+            HomeViewModel.Screen.TVShows -> TvShowsScreen() // Show TV Shows screen if selected
+            HomeViewModel.Screen.Movies -> MoviesScreen() // Show Movies screen if selected
         }
     }
 }
